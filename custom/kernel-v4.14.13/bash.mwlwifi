@@ -1,0 +1,49 @@
+#!/bin/bash
+  $sudo rm -rf $kerneldir/drivers/net/wireless/marvell/mwlwifi  
+  $sudo git clone https://github.com/kaloz/mwlwifi.git \
+       $kerneldir/drivers/net/wireless/marvell/mwlwifi 
+  $sudo git -C $kerneldir/drivers/net/wireless/marvell/mwlwifi checkout adae20af0ddac061807fbaadec6c3b8129290480
+  $sudo mv -f $kerneldir/drivers/net/wireless/marvell/mwlwifi/Makefile.kernel \
+             $kerneldir/drivers/net/wireless/marvell/mwlwifi/Makefile
+  $sudo cp -fr $kerneldir/drivers/net/wireless/marvell/mwlwifi/bin/firmware \
+          $rootfsdir/lib/firmware/mwlwifi
+  $sudo wget -nv -N https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/mrvl/sd8887_uapsta.bin \
+       -P $rootfsdir/lib/firmware/mrvl
+  $sudo wget -nv -N https://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-regdb.git/plain/db.txt \
+       -P $kerneldir/net/wireless
+$sudo patch -d $kerneldir -p1 -N -r - <<'EOF'
+diff -Naur a/drivers/net/wireless/marvell/Kconfig b/drivers/net/wireless/marvell/Kconfig
+--- a/drivers/net/wireless/marvell/Kconfig	2017-09-17 01:47:51.000000000 +0300
++++ b/drivers/net/wireless/marvell/Kconfig	2017-09-22 10:15:55.000000000 +0300
+@@ -14,6 +14,7 @@
+ source "drivers/net/wireless/marvell/libertas/Kconfig"
+ source "drivers/net/wireless/marvell/libertas_tf/Kconfig"
+ source "drivers/net/wireless/marvell/mwifiex/Kconfig"
++source "drivers/net/wireless/marvell/mwlwifi/Kconfig"
+ 
+ config MWL8K
+ 	tristate "Marvell 88W8xxx PCI/PCIe Wireless support"
+diff -Naur a/drivers/net/wireless/marvell/Makefile b/drivers/net/wireless/marvell/Makefile
+--- a/drivers/net/wireless/marvell/Makefile	2017-09-17 01:47:51.000000000 +0300
++++ b/drivers/net/wireless/marvell/Makefile	2017-09-22 10:19:39.000000000 +0300
+@@ -4,3 +4,5 @@
+ obj-$(CONFIG_MWIFIEX)	+= mwifiex/
+ 
+ obj-$(CONFIG_MWL8K)	+= mwl8k.o
++
++obj-$(CONFIG_MWLWIFI)		+= mwlwifi/
+diff -Naur a/firmware/Makefile b/firmware/Makefile
+--- a/firmware/Makefile	2017-09-17 01:47:51.000000000 +0300
++++ b/firmware/Makefile	2017-09-22 12:09:05.757535313 +0300
+@@ -9,6 +9,10 @@
+ 
+ fw-external-y := $(subst $(quote),,$(CONFIG_EXTRA_FIRMWARE))
+ 
++fw-shipped-$(CONFIG_MWLWIFI) += mvlwifi/88W8864.bin \
++				mwlwifi/88W8897.bin \
++				mwlwifi/88W8964.bin
++
+ quiet_cmd_fwbin = MK_FW   $@
+       cmd_fwbin = FWNAME="$(patsubst firmware/%.gen.S,%,$@)";		     \
+ 		  FWSTR="$(subst /,_,$(subst .,_,$(subst -,_,$(patsubst	     \
+EOF

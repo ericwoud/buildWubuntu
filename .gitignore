@@ -1,0 +1,6 @@
+/rootfs-*/
+/*.diff
+/*.tar.gz
+/*.tar.bz2
+/*.bin
+/*.log
