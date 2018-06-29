@@ -48,5 +48,24 @@ $sudo patch -d $kerneldir -p1 -N -r - <<'EOF'
 @@ -21 +21 @@
 -#include <media/dvb_frontend.h>
 +#include "dvb_frontend.h"
+--- a/drivers/media/usb/dvb-usb/cxusb.c	2018-06-29 16:07:14.880466036 +0200
++++ b/drivers/media/usb/dvb-usb/cxusb.c	2018-06-29 16:07:41.772269945 +0200
+@@ -761,7 +761,6 @@
+ 
+ 	adap->fe_adap[0].fe = dvb_attach(lgdt330x_attach,
+ 					 &cxusb_lgdt3303_config,
+-					 0x0e,
+ 					 &adap->dev->i2c_adap);
+ 	if ((adap->fe_adap[0].fe) != NULL)
+ 		return 0;
+@@ -773,7 +772,6 @@
+ {
+ 	adap->fe_adap[0].fe = dvb_attach(lgdt330x_attach,
+ 					 &cxusb_aver_lgdt3303_config,
+-					 0x0e,
+ 					 &adap->dev->i2c_adap);
+ 	if (adap->fe_adap[0].fe != NULL)
+ 		return 0;
+
 EOF
 

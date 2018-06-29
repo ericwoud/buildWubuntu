@@ -165,8 +165,8 @@ if [ "$k" = true ] ; then
   for nr in $kerneldir/bash.* ; do source $nr                                             ; $sudo rm -rf $nr ; done
   for nr in $kerneldir/patch.*; do echo $nr ; $sudo patch -d $kerneldir -p1 -N -r - < $nr ; $sudo rm -rf $nr ; done
   #$sudo make $makeoptions menuconfig
-#  yes n | $sudo make $makeoptions oldconfig   # only add config entries added in patch.diff or bash.script, new entries enter n
-  $sudo make $makeoptions oldnoconfig   # only add config entries added in patch.diff or bash.script, new entries enter n
+  yes n | $sudo make $makeoptions oldconfig   # only add config entries added in patch.diff or bash.script, new entries enter n
+#  $sudo make $makeoptions oldnoconfig   # only add config entries added in patch.diff or bash.script, new entries enter n
   diff -Naur custom/kernel-$kernelversion/.config $kerneldir/.config >config-changes.diff
   $sudo make $makeoptions $makej modules
   #$sudo make $makeoptions headers_install INSTALL_HDR_PATH="../../../usr"
