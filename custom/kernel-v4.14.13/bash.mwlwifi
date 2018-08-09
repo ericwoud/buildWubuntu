@@ -2,7 +2,7 @@
   $sudo rm -rf $kerneldir/drivers/net/wireless/marvell/mwlwifi  
   $sudo git clone https://github.com/kaloz/mwlwifi.git \
        $kerneldir/drivers/net/wireless/marvell/mwlwifi 
-  $sudo git -C $kerneldir/drivers/net/wireless/marvell/mwlwifi checkout adae20af0ddac061807fbaadec6c3b8129290480
+  $sudo git -C $kerneldir/drivers/net/wireless/marvell/mwlwifi checkout d9daa1dfd418a0a790188b805c95c99dea23f1bb
   $sudo mv -f $kerneldir/drivers/net/wireless/marvell/mwlwifi/Makefile.kernel \
              $kerneldir/drivers/net/wireless/marvell/mwlwifi/Makefile
   $sudo cp -fr $kerneldir/drivers/net/wireless/marvell/mwlwifi/bin/firmware \
