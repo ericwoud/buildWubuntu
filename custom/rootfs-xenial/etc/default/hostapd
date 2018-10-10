@@ -19,4 +19,11 @@
 #
 #DAEMON_OPTS=""
 
-DAEMON_CONF="/etc/hostapd/wlp1s0.conf /etc/hostapd/wlp2s0.conf"
+modelstr=$(expr substr $(strings /dev/mtd3 | grep 'modelNumber=') 13 20)
+case $modelstr in 
+  WRT3200ACM*) model="rango"  ;;
+  WRT1900ACS*) model="shelby" ;;
+esac
+if [ ! -z $model ]; then
+  DAEMON_CONF="/etc/hostapd/"$model"-wifi24.conf /etc/hostapd/"$model"-wifi50.conf"
+fi

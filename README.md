@@ -1,14 +1,14 @@
 # buildWubuntu
 
-Install a minimal Ubuntu on WRT3200ACM from scratch. 
+Install a minimal Ubuntu on WRT1900ACS or WRT3200ACM from scratch. 
 
-USE AT YOUR OWN RISC!!!
+USE AT YOUR OWN RISK!!!
 
 ## Getting Started
 
 You need:
 
-  - WRT3200ACM
+  - WRT1900ACS or WRT3200ACM
   - USB Stick
 
 ### Prerequisites

@@ -1,17 +1,17 @@
 #!/bin/bash
 
 case $IFACE in 
-  br0)   ifup -v eth1 lan1 lan2 lan3 lan4 wan ; exit 0 ;;
-# eth0)   nr=0 ;;
-# wlp2s0) nr=1 ;;
-# wlp2s0) nr=2 ;;
-# mlan0)  nr=3 ;;
-  lan1)   nr=4 ;;
-  lan2)   nr=5 ;;
-  lan3)   nr=6 ;;
-  lan4)   nr=7 ;;
-  eth1)   nr=8 ;;
-  wan)    nr=9 ;;
+  br0)   ifup -v eth1 eth0 lan1 lan2 lan3 lan4 wan ; exit 0 ;;
+  eth0)   nr=0 ;;
+  wlp2s0) nr=1 ;;
+  wlp1s0) nr=2 ;;
+  mlan0)  nr=3 ;;
+  lan1)   nr=0 ;;
+  lan2)   nr=0 ;;
+  lan3)   nr=0 ;;
+  lan4)   nr=0 ;;
+  eth1)   nr=0 ;;
+  wan)    nr=0 ;;
   *) exit 0 ;;
 esac
 mac=`strings /dev/mtd3 | grep hw_mac_addr | cut -d= -f2`

@@ -3,7 +3,10 @@
 source-directory /etc/network/interfaces.d
 
 auto lo
+
 iface lo inet loopback
+
+iface eth0 inet manual
 
 iface eth1 inet manual
 
@@ -17,10 +20,8 @@ iface lan4 inet manual
 
 iface wan inet manual
 
-allow-hotplug wlp1s0
 iface wlp1s0 inet manual
 
-allow-hotplug wlp2s0
 iface wlp2s0 inet manual
 
 auto br0

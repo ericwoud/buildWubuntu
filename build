@@ -1,5 +1,7 @@
 #!/bin/bash
 
+### apt install libncurses-dev
+
 mainline="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.14.13"
 kernellocalversion="-wrt0" # Is added to kernelversion by make for name of modules dir.
 release="xenial"           # Ubuntu version
@@ -174,13 +176,16 @@ if [ "$k" = true ] ; then
   kernelrelease=$($sudo make -s $makeoptions kernelrelease)
   $sudo depmod -ab $rootfsdir/. $kernelrelease
   $sudo make $makeoptions $makej zImage
-  $sudo make $makeoptions $makej dtbs
-  cp --remove-destination -v $kerneldir/arch/arm/boot/zImage zImageDtb
-  cat $kerneldir/arch/arm/boot/dts/armada-385-linksys-rango.dtb >> zImageDtb
-  mkimage -A arm -O linux -T kernel -C none -a 0x200000 -e 0x200000 -n linux -d zImageDtb uImageDtb.bin
-  rm -f zImageDtb
-  $sudo cp --remove-destination -v uImageDtb.bin $rootfsdir/lib/firmware/wrt/uImageDtb.bin # default location for firmware_write
-  $sudo cp --remove-destination -v uImageDtb.bin $rootfsdir/lib/firmware/wrt/uImageDtb-$kernelversion$kernellocalversion.bin
+  for model in rango shelby # caiman cobra 
+  do
+    $sudo make $makeoptions $makej armada-385-linksys-$model.dtb
+    cp --remove-destination -v $kerneldir/arch/arm/boot/zImage zImageDtb-$model
+    cat $kerneldir/arch/arm/boot/dts/armada-385-linksys-$model.dtb >> zImageDtb-$model
+    mkimage -A arm -O linux -T kernel -C none -a 0x200000 -e 0x200000 -n linux -d zImageDtb-$model uImageDtb-$model.bin
+    rm -f zImageDtb-$model
+    $sudo cp --remove-destination -v uImageDtb-$model.bin $rootfsdir/lib/firmware/wrt/uImageDtb-$model.bin # default location for firmware_write
+    $sudo cp --remove-destination -v uImageDtb-$model.bin $rootfsdir/lib/firmware/wrt/uImageDtb-$model-$kernelversion$kernellocalversion.bin
+  done
   if [ "$t" = true ]; then
     echo "Creating modules.tar..."
     tar -czf modules-$kernelversion$kernellocalversion.tar.gz -C $rootfsdir/. ./lib/modules/$kernelrelease ./lib/firmware

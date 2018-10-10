@@ -1,33 +1,40 @@
 #!/bin/bash
 
-file=$1 ; [[ -z $file ]] && file="/lib/firmware/wrt/uImageDtb.bin"
-cur_boot_part=`fw_printenv -n boot_part`
-#cur_boot_part="2"
+function fwsetenv { v="${@:2}"; if [ "$(fw_printenv -n $1)" != "$v" ]; then fw_setenv "$@"; fi }
+
+modelstr=$(expr substr $(strings /dev/mtd3 | grep 'modelNumber=') 13 20)
+case $modelstr in 
+  WRT3200ACM*) model="rango"  ;;
+  WRT1900ACS*) model="shelby" ;;
+  *) echo "Unknown model" ; exit ;;
+esac
+echo $modelstr" , name="$model
+
+file=$@ ; [[ -z $file ]] && file="/lib/firmware/wrt/uImageDtb-"$model".bin"
+if [ ! -r "$file" ]; then echo "File not found..." ; exit ; fi
+
+cur_boot_part=$(fw_printenv -n boot_part)
 echo "Current boot_part" $cur_boot_part
-if [ -r "$file" ]; then
-  if [ "$cur_boot_part" = "2" ]; then
-    bp=1 ; mt="/dev/mtd5" ; bc="run nandboot"
-  elif [ "$cur_boot_part" = "1" ]; then
-    bp=2 ; mt="/dev/mtd7" ; bc="run altnandboot"
-  else
-    echo "Error reading boot_part..." ; exit
-  fi
-else
-  echo "File not found..." ; exit
-fi
+case $cur_boot_part in
+  2) bp=1 ;;
+  1) bp=2 ;;
+  *) echo "Error reading boot_part..." ; exit ;;
+esac 
+
+mt=$(echo $(cat /proc/mtd | grep kernel$bp) | cut -d : -f 1)
 
 echo "Are you sure you want to write "$file" to boot_part "$bp" at "$mt" ???" 
 read -p "Type <yes> to confirm: " prompt
 [[ ! $prompt == "yes" ]] && exit
 
-#exit
-
-fw_setenv auto_recovery yes
+fwsetenv auto_recovery yes
 flash_erase $mt 0 0
 nandwrite -p $mt $file
-#fw_setenv bootcmd $bc
-fw_setenv boot_part $bp
-fw_setenv boot_part_ready 3
+fwsetenv boot_part $bp
+fwsetenv boot_part_ready 3
+
+exit
+
 
 
 

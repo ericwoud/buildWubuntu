@@ -2,6 +2,9 @@
 $sudo git clone --depth 1 https://github.com/dtaht/sch_cake.git .tmp
 $sudo mv -f .tmp/*.c .tmp/*.h $kerneldir/net/sched/
 $sudo rm -fr .tmp
+$sudo cat <<EOT | $sudo tee -a $kerneldir/.config
+CONFIG_NET_SCH_CAKE=m
+EOT
 $sudo patch -d $kerneldir -p1 -N -r - <<'EOF'
 diff -Naur a/net/sched/Kconfig b/net/sched/Kconfig
 --- a/net/sched/Kconfig	2018-01-26 19:06:46.000000000 +0100
@@ -30,3 +33,4 @@ diff -Naur a/net/sched/Makefile b/net/sched/Makefile
  obj-$(CONFIG_NET_CLS_U32)	+= cls_u32.o
  obj-$(CONFIG_NET_CLS_ROUTE4)	+= cls_route.o
 EOF
+
