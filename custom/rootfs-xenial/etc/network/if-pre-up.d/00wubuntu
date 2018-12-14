@@ -11,7 +11,7 @@ case $IFACE in
   lan3)   nr=0 ;;
   lan4)   nr=0 ;;
   eth1)   nr=0 ;;
-  wan)    nr=0 ;;
+  wan)    nr=4 ;;
   *) exit 0 ;;
 esac
 mac=`strings /dev/mtd3 | grep hw_mac_addr | cut -d= -f2`

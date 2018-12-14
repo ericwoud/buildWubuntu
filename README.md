@@ -58,6 +58,8 @@ ssh root@192.168.1.2
 
 Wifi is enabled, so this should also work. See files in /etc/hostapd/ for details.
 
+IPforward is off, the system is setup as AP. Also see https://github.com/ericwoud/bridgefdbd to make AP work nicely.
+
 After this, you are on your own. It is supposed to be a minimal installation of Ubuntu.
 
 

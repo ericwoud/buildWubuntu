@@ -8,7 +8,7 @@
  *
  * Copyright (C) 2013 Jonas Gorski <jogo@openwrt.org>
  *
- * Code edited so Linksys boot counter reset code an be used seperately.
+ * Code edited so Linksys boot counter reset code and be used seperately.
  * Original versions from lede project.
  *
  * This program is free software; you can redistribute it and/or
