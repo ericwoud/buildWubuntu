@@ -11,6 +11,9 @@
        -P $rootfsdir/lib/firmware/mrvl
   $sudo wget -nv -N https://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-regdb.git/plain/db.txt \
        -P $kerneldir/net/wireless
+$sudo cat <<EOT | $sudo tee -a $kerneldir/.config
+CONFIG_MWLWIFI=m
+EOT
 $sudo patch -d $kerneldir -p1 -N -r - <<'EOF'
 diff -Naur a/drivers/net/wireless/marvell/Kconfig b/drivers/net/wireless/marvell/Kconfig
 --- a/drivers/net/wireless/marvell/Kconfig	2017-09-17 01:47:51.000000000 +0300

@@ -164,12 +164,16 @@ if [ "$k" = true ] ; then
   $sudo mkdir -p $rootfsdir/lib/firmware/wrt
   $sudo cp -r --remove-destination -v custom/kernel-$kernelversion/. $kerneldir
   $sudo cp -r --remove-destination -v custom/rootfs-$release/lib/firmware/. $rootfsdir/lib/firmware/
+  $sudo cp --remove-destination -v $kerneldir/arch/arm/configs/mvebu_v7_defconfig $kerneldir/arch/arm/configs/wubuntu_defconfig
+  $sudo bash -c "cat               $kerneldir/diff_defconfig                    >>$kerneldir/arch/arm/configs/wubuntu_defconfig"
+  $sudo make $makeoptions wubuntu_defconfig
+  $sudo cp --remove-destination -v $kerneldir/.config $kerneldir/before.config
   for nr in $kerneldir/bash.* ; do source $nr                                             ; $sudo rm -rf $nr ; done
   for nr in $kerneldir/patch.*; do echo $nr ; $sudo patch -d $kerneldir -p1 -N -r - < $nr ; $sudo rm -rf $nr ; done
   #$sudo make $makeoptions menuconfig
-  yes n | $sudo make $makeoptions oldconfig   # only add config entries added in patch.diff or bash.script, new entries enter n
-#  $sudo make $makeoptions oldnoconfig   # only add config entries added in patch.diff or bash.script, new entries enter n
-  diff -Naur custom/kernel-$kernelversion/.config $kerneldir/.config >config-changes.diff
+  $sudo make $makeoptions KCONFIG_ALLCONFIG=.config allnoconfig # only add config entries added in patch.diff or bash.script
+  diff -Naur  $kerneldir/before.config $kerneldir/.config >config-changes.diff
+  $sudo rm -f $kerneldir/before.config
   $sudo make $makeoptions $makej modules
   #$sudo make $makeoptions headers_install INSTALL_HDR_PATH="../../../usr"
   $sudo make $makeoptions modules_install INSTALL_MOD_PATH="../../.."
