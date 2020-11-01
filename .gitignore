@@ -1,5 +1,7 @@
 /rootfs-*/
+/gcc/
 /*.diff
+/*.deb
 /*.tar.gz
 /*.tar.bz2
 /*.bin

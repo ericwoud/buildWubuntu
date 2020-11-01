@@ -35,18 +35,4 @@ diff -Naur a/drivers/net/wireless/marvell/Makefile b/drivers/net/wireless/marvel
  obj-$(CONFIG_MWL8K)	+= mwl8k.o
 +
 +obj-$(CONFIG_MWLWIFI)		+= mwlwifi/
-diff -Naur a/firmware/Makefile b/firmware/Makefile
---- a/firmware/Makefile	2017-09-17 01:47:51.000000000 +0300
-+++ b/firmware/Makefile	2017-09-22 12:09:05.757535313 +0300
-@@ -9,6 +9,10 @@
- 
- fw-external-y := $(subst $(quote),,$(CONFIG_EXTRA_FIRMWARE))
- 
-+fw-shipped-$(CONFIG_MWLWIFI) += mvlwifi/88W8864.bin \
-+				mwlwifi/88W8897.bin \
-+				mwlwifi/88W8964.bin
-+
- quiet_cmd_fwbin = MK_FW   $@
-       cmd_fwbin = FWNAME="$(patsubst firmware/%.gen.S,%,$@)";		     \
- 		  FWSTR="$(subst /,_,$(subst .,_,$(subst -,_,$(patsubst	     \
 EOF

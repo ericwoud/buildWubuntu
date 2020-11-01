@@ -1,0 +1,7 @@
+[Match]
+Name=lan*
+
+[Network]
+BindCarrier=eth1
+Bridge=br0
+

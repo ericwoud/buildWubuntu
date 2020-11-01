@@ -8,7 +8,7 @@
  *
  * Copyright (C) 2013 Jonas Gorski <jogo@openwrt.org>
  *
- * Code edited so Linksys boot counter reset code and be used seperately.
+ * Code edited so Linksys boot counter reset code can be used separately.
  * Original versions from lede project.
  *
  * This program is free software; you can redistribute it and/or
@@ -25,19 +25,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  */
+ 
 #define _GNU_SOURCE
 #include <stdbool.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <endian.h>
 #include <string.h>
-#include <errno.h>
 #include <stdint.h>
 #include <sys/ioctl.h>
 #include <mtd/mtd-user.h>

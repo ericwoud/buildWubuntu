@@ -10,9 +10,6 @@ case $modelstr in
 esac
 echo $modelstr" , name="$model
 
-file=$@ ; [[ -z $file ]] && file="/lib/firmware/wrt/uImageDtb-"$model".bin"
-if [ ! -r "$file" ]; then echo "File not found..." ; exit ; fi
-
 cur_boot_part=$(fw_printenv -n boot_part)
 echo "Current boot_part" $cur_boot_part
 case $cur_boot_part in
@@ -20,21 +17,38 @@ case $cur_boot_part in
   1) bp=2 ;;
   *) echo "Error reading boot_part..." ; exit ;;
 esac 
-
 mt=$(echo $(cat /proc/mtd | grep kernel$bp) | cut -d : -f 1)
 
-echo "Are you sure you want to write "$file" to boot_part "$bp" at "$mt" ???" 
+echo Last written file:
+cat /lib/firmware/wrt/kernel""$bp""lastwritten
+
+ffile=$@ ;
+if  [ -z $ffile ]; then
+  echo Choose from the following files:
+  options=( $(find /lib/firmware/wrt/*-$model-*.bin -maxdepth 0 -print0 -type f | xargs -0) )
+  PS3="Please select a file: "
+  select ffile in "${options[@]}" "Quit" ; do
+    if (( REPLY > 0 && REPLY <= ${#options[@]} )) ; then
+      break
+    else exit
+    fi
+  done    
+fi
+
+if [ ! -r "$ffile" ]; then echo "ffile not found..." ; exit ; fi
+
+
+echo "Are you sure you want to write "$ffile" to boot_part "$bp" at "$mt" ???" 
 read -p "Type <yes> to confirm: " prompt
 [[ ! $prompt == "yes" ]] && exit
 
+echo $ffile >/lib/firmware/wrt/kernel""$bp""lastwritten
+
 fwsetenv auto_recovery yes
-flash_erase $mt 0 0
-nandwrite -p $mt $file
+flash_erase /dev/$mt 0 0
+nandwrite -p /dev/$mt $ffile
 fwsetenv boot_part $bp
 fwsetenv boot_part_ready 3
 
 exit
-
-
-
 

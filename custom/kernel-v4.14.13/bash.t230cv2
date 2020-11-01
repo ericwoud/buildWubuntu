@@ -1,6 +1,6 @@
 #!/bin/bash
-wget -nv -N https://bitbucket.org/CrazyCat/media_build/downloads/dvb-firmwares.tar.bz2 
-$sudo tar --overwrite -vxjC $kerneldir -f dvb-firmwares.tar.bz2 \
+wget -nv -N https://github.com/crazycat69/media_build/releases/download/latest/dvb-firmwares.tar.bz2 
+$sudo tar --overwrite -vxjC $rootfsdir/lib/firmware -f dvb-firmwares.tar.bz2 \
       dvb-demod-si2168-d60-01.fw \
       dvb-tuner-si2141-a10-01.fw 
 #$sudo wget -N https://github.com/osmc/dvb-firmware-osmc/blob/master/dvb-demod-si2168-d60-01.fw?raw=true \

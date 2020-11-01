@@ -1,0 +1,6 @@
+[Match]
+Name=wan
+
+[Network]
+BindCarrier=eth1
+

@@ -1,28 +1,45 @@
 #!/bin/bash
 
-### apt install libncurses-dev
+#gcc=""   # use standard ubuntu gcc version
+gcc="https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q3-update/+download/gcc-arm-none-eabi-4_9-2015q3-20150921-linux.tar.bz2"
+#gcc="https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2019q3/RC1.1/gcc-arm-none-eabi-8-2019-q3-update-linux.tar.bz2"
 
-mainline="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.14.13"
-kernellocalversion="-wrt0" # Is added to kernelversion by make for name of modules dir.
-release="xenial"           # Ubuntu version
-extrapackages=",vim,dbus,screen"  # Extra packages installed in rootfs, comma separated list
-wubuntu="WUBUNTU"          # Label usb-disk for installation
-mbrid="abcdefba"           # Change usb mbr id (partuuid) to this value when options are -uU 
-lc="en_US.UTF-8"           # Locale
-timezone="Europe/Paris"    # Timezone
-keyboard="us"              # Keyboard
-rootpwd="admin"            # Root password
+#mainline="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.14.13"
+mainline="http://kernel.ubuntu.com/~kernel-ppa/mainline/v5.4.69"
+kernellocalversion="-wrt0"           # Is added to kernelversion by make for name of modules dir.
+
+models="rango shelby" # caiman cobra # Model names in arch/arm/boot/dts/armada-385-linksys-xxx.dts
+
+#release="xenial"                    # Ubuntu version
+release="focal"                      # Ubuntu version
+extrapackages="vim,dbus,screen"      # Extra packages installed in rootfs, comma separated list, no spaces
+
+wubuntu="WUBUNTU"                    # Label usb-disk for installation
+mbrid="abcdefba"                     # Change usb mbr id (partuuid) to this value when options are -uU 
+lc="en_US.UTF-8"                     # Locale
+timezone="Europe/Paris"              # Timezone
+keyboard="us"                        # Keyboard
+rootpwd="admin"                      # Root password
 
 function finish {
   echo Running exit function to clean up...
   if [ "$u" = true ] ; then
-    $sudo umount $rootfsdir
+    while mountpoint -q $rootfsdir; do
+      $sudo umount $rootfsdir
+      sleep 0.1
+    done    
     $sudo rm -rf $rootfsdir
   fi
 }
 
+function link2rel {
+  target=$(readlink $1);
+  relative_target=$(realpath $target --relative-to=$1 --no-symlinks --canonicalize-missing);
+  $sudo ln --force --symbolic $relative_target $1
+}
+
 exec > >(tee -i build.log)
-exec 2> >(tee -i build-error.log)
+exec 2> >(tee build-error.log)
 
 # INIT VARIABLES
 [ $USER = "root" ] && sudo="" || sudo="sudo"
@@ -35,6 +52,17 @@ $sudo true
 shopt -s extglob
 if [ -z $(cat /proc/cpuinfo | grep Hardware.*Armada.*380/385) ]; then
   echo "Not running on Armada CPU"
+  if [ -z $gcc ]; then
+    gccpath=""
+  else
+    gccpath=$(realpath $(find gcc -wholename */bin/arm-none-eabi-gcc))
+    if [ ${#gccpath} -ge 17 ]; then gccpath=${gccpath:0:-17}
+    else 
+      echo Install the desired gcc first with option -a.
+      exit""
+    fi
+  fi
+  crossc="CROSS_COMPILE="$gccpath"arm-none-eabi-" 
   makej="-j4"
   if [ "$u" = true ] && [ ! -z $(blkid -L $wubuntu) ]; then
     rootfsdir=/media/$wubuntu
@@ -61,6 +89,7 @@ if [ -z $(cat /proc/cpuinfo | grep Hardware.*Armada.*380/385) ]; then
   fi
 else
   echo "Running on Armada CPU"
+  crossc=""
   makej="-j1" # make with one core on WRT to try not overheating cpu
   rootfsdir="" ; r="" ; R="" ; u=""
 fi
@@ -83,25 +112,28 @@ if [ "$T" = true ] ; then
   rm -f rootfs-$release.tar.bz2 kernel-$kernelversion.tar.gz modules-$kernelversion$kernellocalversion.tar.gz
 fi
 if [ "$a" = true ]; then
+  $sudo apt-get install --yes build-essential flex bison gcc-arm-none-eabi u-boot-tools libncurses-dev
   if [ -z $rootfsdir ]; then
-    $sudo apt-get install --yes wget git build-essential bc ca-certificates gcc-arm-none-eabi # install these when running on WRT
+    $sudo apt-get install --yes wget bc ca-certificates  # install these when running on WRT
   else
-    if ! grep -q "^deb .*jacob/virtualisation" /etc/apt/sources.list /etc/apt/sources.list.d/*; then
-      $sudo add-apt-repository --yes ppa:jacob/virtualisation
-      $sudo apt-get update  
-    fi
-    $sudo apt-get install --yes debootstrap qemu-user-static git build-essential u-boot-tools gcc-arm-none-eabi
+    $sudo apt-get install --yes debootstrap qemu-user-static libc6:i386 gcc-arm-linux-gnueabihf
+    gccname=$(basename $gcc)
+    wget -nv -N $gcc
+    rm -rf gcc
+    mkdir gcc
+    tar -xjf $gccname -C gcc  
   fi
 fi
 
 ### ROOTFS ###
 if [ "$r" = true ]; then
-  [ ! -z $rootfsdir ] && echo $sudo mkdir $rootfsdir
+  [ ! -z $rootfsdir ] && $sudo mkdir $rootfsdir
   if [ ! -d "$rootfsdir/sbin" ]; then
     if [ ! -f "rootfs-$release.tar.bz2" ]; then
+      packages="locales,hostapd,u-boot-tools,mtd-utils,openssh-server,crda,resolvconf,$extrapackages"
+      [[ -f "custom/rootfs-$release/etc/network/interfaces" ]] && packages="$packages,ifupdown"
       $sudo debootstrap --arch=armhf --foreign --no-check-gpg --components=main,restricted,universe,multiverse \
-        --include="locales,hostapd,bridge-utils,ifupdown,u-boot-tools,mtd-utils,build-essential,openssh-server$extrapackages" \
-        $release $rootfsdir "http://ports.ubuntu.com/ubuntu-ports"
+        --include="$packages" $release $rootfsdir "http://ports.ubuntu.com/ubuntu-ports"
       $sudo cp /usr/bin/qemu-arm-static $rootfsdir/usr/bin/
       $schroot /debootstrap/debootstrap --second-stage
       if [ "$t" = true ]; then
@@ -114,7 +146,7 @@ if [ "$r" = true ]; then
       $sudo tar -xjf rootfs-$release.tar.bz2 -C $rootfsdir
     fi
   fi
-#  $schroot locale-gen $lc
+  $schroot locale-gen $lc
   $schroot update-locale LANGUAGE=$lc LC_ALL=$lc LANG=$lc
   #LC_PAPER=$lc LC_ADDRESS=$lc LC_MONETARY=$lc LC_NUMERIC=$lc LC_TELEPHONE=$lc LC_IDENTIFICATION=$lc LC_MEASUREMENT=$lc LC_TIME=$lc LC_NAME=$lc
   $schroot ln -sf /usr/share/zoneinfo/${timezone} /etc/localtime
@@ -123,13 +155,15 @@ if [ "$r" = true ]; then
   $sudo cp -r --remove-destination -v custom/rootfs-$release/. $rootfsdir
   for nr in $rootfsdir/bash.* ; do source $nr                                             ; $sudo rm -rf $nr ; done
   for nr in $rootfsdir/patch.*; do echo $nr ; $sudo patch -d $rootfsdir -p1 -N -r - < $nr ; $sudo rm -rf $nr ; done
+  [[ -d "custom/rootfs-$release/etc/systemd/network" ]] && $schroot systemctl reenable systemd-networkd.service
   find "custom/rootfs-$release/etc/systemd/system" -name "*.service"| while read service ; do
     $schroot systemctl reenable $(basename $service) # enable all custom services
   done
+  $schroot systemctl daemon-reload
   $sudo mkdir -p $rootfsdir/root/buildWubuntu
   $sudo cp -rfv custom $rootfsdir/root/buildWubuntu/custom
   $sudo cp -fv build $rootfsdir/root/buildWubuntu/build
-  $schroot make --directory=/root/buildWubuntu/custom/tools clean default
+  $sudo make --directory=$rootfsdir/root/buildWubuntu/custom/tools clean linksys_bootcount_cross
   if [ "$k" != true ] && [ -f "modules-$kernelversion$kernellocalversion.tar.gz" ]; then
     echo "Not compiling kernel, adding modules and firmware from .tar..."
     $sudo tar -xzf modules-$kernelversion$kernellocalversion.tar.gz -C $rootfsdir
@@ -141,15 +175,19 @@ if [ "$k" = true ] ; then
   $sudo mkdir $rootfsdir
   if [ ! -d "$kerneldir" ]; then
     if [ ! -f "kernel-$kernelversion.tar.gz" ]; then
+      gitbranch=$(wget -nv -qO- $mainline/HEADER.html | grep -m 1 git://)
+      gitbranch=${gitbranch//&nbsp;/}
+      gitbranch=(${gitbranch//<br>/})
+      $sudo git clone --branch ${gitbranch[1]} --depth 1 ${gitbranch[0]} $kerneldir
+      $sudo rm -rf $kerneldir/.git
       sources=$(wget -nv -qO- $mainline/SOURCES) ; readarray -t sources <<<"$sources"
-      kernelgit=(${sources[0]})
-      echo "GIT CLONE" $kernelversion "=" ${kernelgit[1]} "SHOULD BE COMMIT:" ${kernelgit[2]}
-      $sudo git clone --branch $kernelversion --depth 1 ${kernelgit[0]} $kerneldir
-      src=1
-      while [ $src -lt ${#sources[@]} ]; do
-        wget -nv -O /dev/stdout $mainline"/"${sources[$src]} | $sudo patch -d $kerneldir -p1
-        let src++
-      done
+      if [ ! -z "${sources[0]}" ]; then # has SOURCES file
+        src=1
+        while [ $src -lt ${#sources[@]} ]; do
+          wget -nv -O /dev/stdout $mainline"/"${sources[$src]} | $sudo patch -d $kerneldir -p1
+          let src++
+        done
+      fi
       if [ "$t" = true ]; then
         echo "Creating kernel.tar..."
         tar -czf kernel-$kernelversion.tar.gz -C $kerneldir .
@@ -160,7 +198,7 @@ if [ "$k" = true ] ; then
       $sudo tar -xzf kernel-$kernelversion.tar.gz -C $kerneldir
     fi
   fi
-  makeoptions="--directory="$kerneldir" LOCALVERSION="$kernellocalversion" DEFAULT_HOSTNAME=WUBUNTUTEST ARCH=arm CROSS_COMPILE=arm-none-eabi-"
+  makeoptions="--directory="$kerneldir" LOCALVERSION="$kernellocalversion" DEFAULT_HOSTNAME=WUBUNTUTEST ARCH=arm "$crossc" KBUILD_BUILD_TIMESTAMP=1/1/2011 KBUILD_BUILD_VERSION=123"
   $sudo mkdir -p $rootfsdir/lib/firmware/wrt
   $sudo cp -r --remove-destination -v custom/kernel-$kernelversion/. $kerneldir
   $sudo cp -r --remove-destination -v custom/rootfs-$release/lib/firmware/. $rootfsdir/lib/firmware/
@@ -174,21 +212,22 @@ if [ "$k" = true ] ; then
   $sudo make $makeoptions KCONFIG_ALLCONFIG=.config allnoconfig # only add config entries added in patch.diff or bash.script
   diff -Naur  $kerneldir/before.config $kerneldir/.config >config-changes.diff
   $sudo rm -f $kerneldir/before.config
-  $sudo make $makeoptions $makej modules
-  #$sudo make $makeoptions headers_install INSTALL_HDR_PATH="../../../usr"
+  $sudo make $makeoptions $makej zImage modules
   $sudo make $makeoptions modules_install INSTALL_MOD_PATH="../../.."
   kernelrelease=$($sudo make -s $makeoptions kernelrelease)
   $sudo depmod -ab $rootfsdir/. $kernelrelease
-  $sudo make $makeoptions $makej zImage
-  for model in rango shelby # caiman cobra 
+  link2rel $rootfsdir/lib/modules/$kernelrelease/build
+  link2rel $rootfsdir/lib/modules/$kernelrelease/source
+  md5str=$(openssl dgst -r -md5 $kerneldir/vmlinux); md5str=${md5str: 0: 8} # only changes with vmlinux changes
+  for model in $models 
   do
     $sudo make $makeoptions $makej armada-385-linksys-$model.dtb
     cp --remove-destination -v $kerneldir/arch/arm/boot/zImage zImageDtb-$model
     cat $kerneldir/arch/arm/boot/dts/armada-385-linksys-$model.dtb >> zImageDtb-$model
     mkimage -A arm -O linux -T kernel -C none -a 0x200000 -e 0x200000 -n linux -d zImageDtb-$model uImageDtb-$model.bin
     rm -f zImageDtb-$model
-    $sudo cp --remove-destination -v uImageDtb-$model.bin $rootfsdir/lib/firmware/wrt/uImageDtb-$model.bin # default location for firmware_write
-    $sudo cp --remove-destination -v uImageDtb-$model.bin $rootfsdir/lib/firmware/wrt/uImageDtb-$model-$kernelversion$kernellocalversion.bin
+    $sudo cp --remove-destination -v uImageDtb-$model.bin \
+             $rootfsdir/lib/firmware/wrt/uImageDtb-$model-$kernelversion$kernellocalversion-$md5str.bin
   done
   if [ "$t" = true ]; then
     echo "Creating modules.tar..."

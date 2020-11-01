@@ -2,7 +2,9 @@
 
 Install a minimal Ubuntu on WRT1900ACS or WRT3200ACM from scratch. 
 
-USE AT YOUR OWN RISK!!!
+USE AT YOUR OWN RISC!!!
+
+Last update 1-Nov-2020
 
 ## Getting Started
 
@@ -61,6 +63,19 @@ Wifi is enabled, so this should also work. See files in /etc/hostapd/ for detail
 IPforward is off, the system is setup as AP. Also see https://github.com/ericwoud/bridgefdbd to make AP work nicely.
 
 After this, you are on your own. It is supposed to be a minimal installation of Ubuntu.
+
+
+## Latest updates (1-Nov-2020)
+
+* Ubuntu Focal
+* Kernel V5.4.69
+* Much faster startup due to changing from ifupdown (/etc/network/interfaces)
+  to systemd-networkd.service (/etc/systemd/network).
+* Option to choose different cross compiler version by specifying tarball to download.
+* Add 8 digit md5 code to firmware.bin to easily check if the contents changed. 
+  This helps to determine if you need to flash a new firmware.
+* Improved firmware_write script.
+* Uses diffdef_config to easily change to newer kernel.
 
 
 ## Features

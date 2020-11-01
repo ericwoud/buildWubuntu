@@ -1,0 +1,22 @@
+[Unit]
+Description=Setup MAC addresses
+DefaultDependencies=no
+Conflicts=shutdown.target
+Before=basic.target shutdown.target
+#RefuseManualStop=yes
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=bash -c "mac=$(strings /dev/mtd3 | grep hw_mac_addr | cut -d= -f2) ;\
+for i in 1 2 3; do declare mac$i=${mac::-2}$(printf %%02X $(($(($((16#${mac: -2}))+$i))&255))); done ;\
+d=/run/systemd/network ; mkdir -p $d ;\
+echo -e '[Match]\nOriginalName=lan* eth*\n\n[Link]\nMACAddress='$mac                             >$d/10-lan.link ;\
+echo -e '[Match]\nProperty=ID_NET_NAME_PATH=wlp1s0\n\n[Link]\nNamePolicy=path\nMACAddress='$mac1 >$d/10-wlp1s0.link ;\
+echo -e '[Match]\nProperty=ID_NET_NAME_PATH=wlp2s0\n\n[Link]\nNamePolicy=path\nMACAddress='$mac2 >$d/10-wlp2s0.link ;\
+echo -e '[Match]\nOriginalName=wan\n\n[Link]\nMACAddress='$mac3                                  >$d/10-wan.link ;\
+"
+
+[Install]
+WantedBy=basic.target
+
