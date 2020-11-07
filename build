@@ -32,12 +32,6 @@ function finish {
   fi
 }
 
-function link2rel {
-  target=$(readlink $1);
-  relative_target=$(realpath $target --relative-to=$1 --no-symlinks --canonicalize-missing);
-  $sudo ln --force --symbolic $relative_target $1
-}
-
 exec > >(tee -i build.log)
 exec 2> >(tee build-error.log)
 
@@ -52,17 +46,6 @@ $sudo true
 shopt -s extglob
 if [ -z $(cat /proc/cpuinfo | grep Hardware.*Armada.*380/385) ]; then
   echo "Not running on Armada CPU"
-  if [ -z $gcc ]; then
-    gccpath=""
-  else
-    gccpath=$(realpath $(find gcc -wholename */bin/arm-none-eabi-gcc))
-    if [ ${#gccpath} -ge 17 ]; then gccpath=${gccpath:0:-17}
-    else 
-      echo Install the desired gcc first with option -a.
-      exit""
-    fi
-  fi
-  crossc="CROSS_COMPILE="$gccpath"arm-none-eabi-" 
   makej="-j4"
   if [ "$u" = true ] && [ ! -z $(blkid -L $wubuntu) ]; then
     rootfsdir=/media/$wubuntu
@@ -89,11 +72,21 @@ if [ -z $(cat /proc/cpuinfo | grep Hardware.*Armada.*380/385) ]; then
   fi
 else
   echo "Running on Armada CPU"
-  crossc=""
   makej="-j1" # make with one core on WRT to try not overheating cpu
   rootfsdir="" ; r="" ; R="" ; u=""
 fi
 
+if [ -z $gcc ]; then
+  gccpath=""
+else
+  gccpath=$(realpath $(find gcc -wholename */bin/arm-none-eabi-gcc))
+  if [ ${#gccpath} -ge 17 ]; then gccpath=${gccpath:0:-17}
+  else 
+    echo Install the desired gcc first with option -a.
+    exit""
+  fi
+fi
+crossc="CROSS_COMPILE="$gccpath"arm-none-eabi-" 
 kernelversion=$(basename $mainline)
 schroot="$sudo LC_ALL=C LANGUAGE=C LANG=C chroot $rootfsdir"
 kerneldir=$rootfsdir/usr/src/linux-headers-$kernelversion
@@ -208,16 +201,16 @@ if [ "$k" = true ] ; then
   $sudo cp --remove-destination -v $kerneldir/.config $kerneldir/before.config
   for nr in $kerneldir/bash.* ; do source $nr                                             ; $sudo rm -rf $nr ; done
   for nr in $kerneldir/patch.*; do echo $nr ; $sudo patch -d $kerneldir -p1 -N -r - < $nr ; $sudo rm -rf $nr ; done
-  #$sudo make $makeoptions menuconfig
   $sudo make $makeoptions KCONFIG_ALLCONFIG=.config allnoconfig # only add config entries added in patch.diff or bash.script
+  #$sudo make $makeoptions menuconfig
   diff -Naur  $kerneldir/before.config $kerneldir/.config >config-changes.diff
   $sudo rm -f $kerneldir/before.config
   $sudo make $makeoptions $makej zImage modules
   $sudo make $makeoptions modules_install INSTALL_MOD_PATH="../../.."
   kernelrelease=$($sudo make -s $makeoptions kernelrelease)
   $sudo depmod -ab $rootfsdir/. $kernelrelease
-  link2rel $rootfsdir/lib/modules/$kernelrelease/build
-  link2rel $rootfsdir/lib/modules/$kernelrelease/source
+  $sudo ln --force --symbolic --relative --no-dereference $kerneldir $rootfsdir/lib/modules/$kernelrelease/build
+  $sudo ln --force --symbolic --relative --no-dereference $kerneldir $rootfsdir/lib/modules/$kernelrelease/source
   md5str=$(openssl dgst -r -md5 $kerneldir/vmlinux); md5str=${md5str: 0: 8} # only changes with vmlinux changes
   for model in $models 
   do
