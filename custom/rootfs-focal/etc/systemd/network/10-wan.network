@@ -1,6 +1,10 @@
 [Match]
 Name=wan
 
+[Link]
+RequiredForOnline=no
+
 [Network]
 BindCarrier=eth1
+IPForward=yes
 

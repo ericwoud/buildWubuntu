@@ -1,6 +1,9 @@
 [Match]
 Name=lan*
 
+[Link]
+RequiredForOnline=no
+
 [Network]
 BindCarrier=eth1
 Bridge=br0
