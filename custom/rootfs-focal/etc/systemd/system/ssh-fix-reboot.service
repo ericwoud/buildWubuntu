@@ -1,7 +1,7 @@
 [Unit]
 Description=Secure Shell session cleanup V2
 Wants=network-online.target
-After=network.target network-online.target
+After=network.target network-online.target hostapd.service
 
 [Service]
 SyslogIdentifier=ssh-fix-reboot
