@@ -55,25 +55,31 @@ After flashing the firmware, insert the usb stick, connect the WRT with a LAN po
 To connect to WUBUNTU, password admin:
 
 ```
-ssh root@192.168.1.2
+ssh root@192.168.5.1
 ```
 
 Wifi is enabled, so this should also work. See files in /etc/hostapd/ for details.
 
-IPforward is off, the system is setup as AP. Also see https://github.com/ericwoud/bridgefdbd to make AP work nicely.
+IPforward is on, the system is setup as router. Also see https://github.com/ericwoud/bridgefdbd to make AP work nicely.
 
 After this, you are on your own. It is supposed to be a minimal installation of Ubuntu.
+
 
 ## TODO:
 
 * Guest WIFI
+* Kernel v5.10 lts
+* Test all new changes in build from scratch
+
 
 ## Latest updates (5-Dec-2020)
 
 * Use DSA port 6 and call it "aux".
 * Setup VLAN.
 * Setup as router.
+* Setup dhcpd.
 * Setup WAN connection on eth0. Now outbound traffic goes through et0-aux-wan ports, as they should.
+
 
 ## Updates (1-Nov-2020)
 
@@ -113,7 +119,7 @@ Custom kernel directory:
 
 * Support for network and wifi
 * Cake support, not tested
-* MyGica T230C2 DVB-T and DVB-C support, not fully tested yet
+* MyGica T230C2 DVB-T and DVB-C support
 
 Custom rootfs directory:
 
