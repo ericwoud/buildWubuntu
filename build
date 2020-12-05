@@ -12,6 +12,7 @@ models="rango shelby" # caiman cobra # Model names in arch/arm/boot/dts/armada-3
 
 #release="xenial"                    # Ubuntu version
 release="focal"                      # Ubuntu version
+neededpackages="locales,hostapd,u-boot-tools,mtd-utils,openssh-server,crda,resolvconf,iproute2,nftables"
 extrapackages="vim,dbus,screen"      # Extra packages installed in rootfs, comma separated list, no spaces
 
 wubuntu="WUBUNTU"                    # Label usb-disk for installation
@@ -123,7 +124,7 @@ if [ "$r" = true ]; then
   [ ! -z $rootfsdir ] && $sudo mkdir $rootfsdir
   if [ ! -d "$rootfsdir/sbin" ]; then
     if [ ! -f "rootfs-$release.tar.bz2" ]; then
-      packages="locales,hostapd,u-boot-tools,mtd-utils,openssh-server,crda,resolvconf,$extrapackages"
+      packages=$neededpackages","$extrapackages
       [[ -f "custom/rootfs-$release/etc/network/interfaces" ]] && packages="$packages,ifupdown"
       $sudo debootstrap --arch=armhf --foreign --no-check-gpg --components=main,restricted,universe,multiverse \
         --include="$packages" $release $rootfsdir "http://ports.ubuntu.com/ubuntu-ports"
