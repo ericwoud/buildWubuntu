@@ -1,5 +1,5 @@
 [Match]
-Name=lan*
+Name=lan1 lan2 lan3 lan4
 
 [Link]
 RequiredForOnline=no
@@ -7,4 +7,9 @@ RequiredForOnline=no
 [Network]
 BindCarrier=eth1
 Bridge=br0
+
+[BridgeVLAN]
+VLAN=3
+PVID=3
+EgressUntagged=3
 

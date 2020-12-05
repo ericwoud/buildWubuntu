@@ -1,10 +1,15 @@
 [Match]
-Name=wan
+Name=wan aux
 
 [Link]
 RequiredForOnline=no
 
 [Network]
 BindCarrier=eth1
-IPForward=yes
+Bridge=br0
+
+[BridgeVLAN]
+PVID=2
+EgressUntagged=2
+VLAN=2
 

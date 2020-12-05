@@ -2,3 +2,7 @@
 Name=br0
 Kind=bridge
 
+[Bridge]
+DefaultPVID=0
+VLANFiltering=1
+
