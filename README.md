@@ -64,8 +64,18 @@ IPforward is off, the system is setup as AP. Also see https://github.com/ericwou
 
 After this, you are on your own. It is supposed to be a minimal installation of Ubuntu.
 
+## TODO:
 
-## Latest updates (1-Nov-2020)
+* Guest WIFI
+
+## Latest updates (5-Dec-2020)
+
+* Use DSA port 6 and call it "aux".
+* Setup VLAN.
+* Setup as router.
+* Setup WAN connection on eth0. Now outbound traffic goes through et0-aux-wan ports, as they should.
+
+## Updates (1-Nov-2020)
 
 * Ubuntu Focal
 * Kernel V5.4.69
