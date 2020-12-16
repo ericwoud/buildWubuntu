@@ -1,0 +1,14 @@
+[Match]
+Name=veth2
+
+[Link]
+RequiredForOnline=no
+
+[Network]
+Bridge=br0
+
+[BridgeVLAN]
+VLAN=2
+PVID=2
+EgressUntagged=2
+

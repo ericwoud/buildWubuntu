@@ -1,0 +1,6 @@
+[Match]
+Name=eth1
+
+[Link]
+RequiredForOnline=no
+

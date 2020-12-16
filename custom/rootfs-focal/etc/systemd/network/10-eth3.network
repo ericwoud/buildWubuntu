@@ -1,0 +1,9 @@
+[Match]
+Name=eth3
+
+[Link]
+RequiredForOnline=no
+
+[Network]
+Address=192.168.6.1/24
+
