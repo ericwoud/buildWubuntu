@@ -9,7 +9,7 @@ BindCarrier=eth1
 Bridge=br0
 
 [BridgeVLAN]
-PVID=2
-EgressUntagged=2
-VLAN=2
+PVID=2000
+EgressUntagged=2000
+VLAN=2000
 

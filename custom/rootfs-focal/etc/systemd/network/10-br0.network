@@ -5,12 +5,8 @@ Name=br0
 RequiredForOnline=yes
 
 [Network]
-Address=192.168.5.1/24
 IPForward=yes
-VLAN=br0.4
 
 [BridgeVLAN]
-VLAN=3-4
-PVID=3
-EgressUntagged=3
+VLAN=2-3
 
