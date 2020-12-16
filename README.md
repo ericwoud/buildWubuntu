@@ -4,8 +4,6 @@ Install a minimal Ubuntu on WRT1900ACS or WRT3200ACM from scratch.
 
 USE AT YOUR OWN RISC!!!
 
-Last update 1-Nov-2020
-
 ## Getting Started
 
 You need:
@@ -64,15 +62,28 @@ IPforward is on, the system is setup as router. Also see https://github.com/eric
 
 After this, you are on your own. It is supposed to be a minimal installation of Ubuntu.
 
+When you need to build in-tree/out-of-tree kernel modules, first execute the following on the WRT:
+
+```
+./build -akp
+```
+It helps set up the build scripts correctly (as armhf executable instead of x86 executable).
+
 
 ## TODO:
 
-* Guest WIFI
 * Kernel v5.10 lts
+* Setup nftables separation local and guest network
 * Test all new changes in build from scratch
 
 
-## Latest updates (5-Dec-2020)
+## Latest updates (16-Dec-2020)
+
+* Guest WIFI
+* Using veth devices instead of vlan devices. Now hostapd authentication works in combination with a vlan aware bridge. When attaching br0.2 and br0.3 to br0, hostapd cannot communicate over br0 anymore.
+* Patch cpu port. After applying this patch, any vlan group within 2000-2020 will not also be added to the dsa cpu port. It does not seem to be necessary to apply this patch, but traffic does not need to go the cpu port when forwarding traffic through eth0 <-> aux <-> wan.
+
+## Updates (5-Dec-2020)
 
 * Use DSA port 6 and call it "aux".
 * Setup VLAN.
@@ -109,6 +120,7 @@ After this, you are on your own. It is supposed to be a minimal installation of 
 * Deletion of RootFS. Use -R
 * Deletion of Kernel. Use -K
 * Building on USB Stick. Use -u
+* Make modules_prepare omly. Use -p together with -k
 * Default options when no options entered -r -k -a -t -u
 * build script can run on WRT also, to compile a new kernel.
 * Adding extra packages to install. See extrapackages= at top of build script.

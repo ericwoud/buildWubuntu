@@ -11,6 +11,6 @@
 #
 # By default this script does nothing.
 
-/root/buildWubuntu/custom/tools/linksys_bootcount resetbc
+linksys_bootcount resetbc
 
 exit 0

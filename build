@@ -38,7 +38,7 @@ exec 2> >(tee build-error.log)
 
 # INIT VARIABLES
 [ $USER = "root" ] && sudo="" || sudo="sudo"
-[[ $# == 0 ]] && args="-rktua"|| args=$@
+[[ $# == 0 ]] && args="-rktuap"|| args=$@
 echo "build "$args
 cd $(dirname $0)
 while getopts ":rktuaRKTU" opt $args; do declare "${opt}=true" ; done
@@ -75,19 +75,9 @@ else
   echo "Running on Armada CPU"
   makej="-j1" # make with one core on WRT to try not overheating cpu
   rootfsdir="" ; r="" ; R="" ; u=""
+  gcc=""
 fi
 
-if [ -z $gcc ]; then
-  gccpath=""
-else
-  gccpath=$(realpath $(find gcc -wholename */bin/arm-none-eabi-gcc))
-  if [ ${#gccpath} -ge 17 ]; then gccpath=${gccpath:0:-17}
-  else 
-    echo Install the desired gcc first with option -a.
-    exit""
-  fi
-fi
-crossc="CROSS_COMPILE="$gccpath"arm-none-eabi-" 
 kernelversion=$(basename $mainline)
 schroot="$sudo LC_ALL=C LANGUAGE=C LANG=C chroot $rootfsdir"
 kerneldir=$rootfsdir/usr/src/linux-headers-$kernelversion
@@ -118,6 +108,17 @@ if [ "$a" = true ]; then
     tar -xjf $gccname -C gcc  
   fi
 fi
+if [ -z $gcc ]; then
+  gccpath=""
+else
+  gccpath=$(realpath $(find gcc -wholename */bin/arm-none-eabi-gcc))
+  if [ ${#gccpath} -ge 17 ]; then gccpath=${gccpath:0:-17}
+  else 
+    echo Install the desired gcc first with option -a.
+    exit""
+  fi
+fi
+[ ! -z $rootfsdir ] && crossc="CROSS_COMPILE="$gccpath"arm-none-eabi-" || crossc=""
 
 ### ROOTFS ###
 if [ "$r" = true ]; then
@@ -155,9 +156,10 @@ if [ "$r" = true ]; then
   done
   $schroot systemctl daemon-reload
   $sudo mkdir -p $rootfsdir/root/buildWubuntu
-  $sudo cp -rfv custom $rootfsdir/root/buildWubuntu/custom
-  $sudo cp -fv build $rootfsdir/root/buildWubuntu/build
+  $sudo cp -rfv custom $rootfsdir/root/buildWubuntu/
+  $sudo cp -fv build $rootfsdir/root/buildWubuntu/
   $sudo make --directory=$rootfsdir/root/buildWubuntu/custom/tools clean linksys_bootcount_cross
+  $sudo cp -fv $rootfsdir/root/buildWubuntu/custom/tools/linksys_bootcount $rootfsdir/usr/local/sbin/linksys_bootcount
   if [ "$k" != true ] && [ -f "modules-$kernelversion$kernellocalversion.tar.gz" ]; then
     echo "Not compiling kernel, adding modules and firmware from .tar..."
     $sudo tar -xzf modules-$kernelversion$kernellocalversion.tar.gz -C $rootfsdir
@@ -192,7 +194,7 @@ if [ "$k" = true ] ; then
       $sudo tar -xzf kernel-$kernelversion.tar.gz -C $kerneldir
     fi
   fi
-  makeoptions="--directory="$kerneldir" LOCALVERSION="$kernellocalversion" DEFAULT_HOSTNAME=WUBUNTUTEST ARCH=arm "$crossc" KBUILD_BUILD_TIMESTAMP=1/1/2011 KBUILD_BUILD_VERSION=123"
+  makeoptions="--directory="$kerneldir" LOCALVERSION="$kernellocalversion" DEFAULT_HOSTNAME=WUBUNTUTEST ARCH=arm "$crossc" KBUILD_BUILD_TIMESTAMP=1/1/2011 KBUILD_BUILD_VERSION=123 KCFLAGS=-w"
   $sudo mkdir -p $rootfsdir/lib/firmware/wrt
   $sudo cp -r --remove-destination -v custom/kernel-$kernelversion/. $kerneldir
   $sudo cp -r --remove-destination -v custom/rootfs-$release/lib/firmware/. $rootfsdir/lib/firmware/
@@ -206,6 +208,8 @@ if [ "$k" = true ] ; then
   #$sudo make $makeoptions menuconfig
   diff -Naur  $kerneldir/before.config $kerneldir/.config >config-changes.diff
   $sudo rm -f $kerneldir/before.config
+  $sudo make $makeoptions $makej scripts modules_prepare
+  [[ "$p" = true ]] && exit
   $sudo make $makeoptions $makej zImage modules
   $sudo make $makeoptions modules_install INSTALL_MOD_PATH="../../.."
   kernelrelease=$($sudo make -s $makeoptions kernelrelease)
