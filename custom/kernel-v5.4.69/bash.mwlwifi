@@ -3,8 +3,6 @@
   $sudo git clone https://github.com/kaloz/mwlwifi.git \
        $kerneldir/drivers/net/wireless/marvell/mwlwifi 
   $sudo git -C $kerneldir/drivers/net/wireless/marvell/mwlwifi checkout 111118dc2ea3b592a5f7dff18c82d57a651970e7
-  $sudo mv -f $kerneldir/drivers/net/wireless/marvell/mwlwifi/Makefile.kernel \
-             $kerneldir/drivers/net/wireless/marvell/mwlwifi/Makefile
   $sudo cp -fr $kerneldir/drivers/net/wireless/marvell/mwlwifi/bin/firmware \
           $rootfsdir/lib/firmware/mwlwifi
   $sudo wget -nv -N https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/mrvl/sd8887_uapsta.bin \
@@ -14,6 +12,26 @@
 $sudo cat <<EOT | $sudo tee -a $kerneldir/.config
 CONFIG_MWLWIFI=m
 EOT
+$sudo cat <<"EOM" | $sudo tee $kerneldir/drivers/net/wireless/marvell/mwlwifi/Makefile
+mwlwifi-y += core.o
+mwlwifi-y += mac80211.o
+mwlwifi-y += mu_mimo.o
+mwlwifi-y += vendor_cmd.o
+mwlwifi-y += utils.o
+mwlwifi-$(CONFIG_THERMAL) += thermal.o
+mwlwifi-$(CONFIG_DEBUG_FS) += debugfs.o
+mwlwifi-y += hif/fwcmd.o
+mwlwifi-y += hif/pcie/pcie.o
+mwlwifi-y += hif/pcie/fwdl.o
+mwlwifi-y += hif/pcie/tx.o
+mwlwifi-y += hif/pcie/rx.o
+mwlwifi-y += hif/pcie/tx_ndp.o
+mwlwifi-y += hif/pcie/rx_ndp.o
+obj-$(CONFIG_MWLWIFI) += mwlwifi.o
+
+ccflags-y += -I$(src)
+ccflags-y += -D__CHECK_ENDIAN__
+EOM
 $sudo patch -d $kerneldir -p1 -N -r - <<'EOF'
 diff -Naur a/drivers/net/wireless/marvell/Kconfig b/drivers/net/wireless/marvell/Kconfig
 --- a/drivers/net/wireless/marvell/Kconfig	2017-09-17 01:47:51.000000000 +0300
