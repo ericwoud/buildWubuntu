@@ -1,0 +1,5 @@
+#!/bin/bash
+  [ ! -d "$kerneldir/outoftree/mcspoof" ] && $sudo git clone https://github.com/ericwoud/mcspoof.git \
+       $kerneldir/outoftree/mcspoof 
+  $sudo git -C $kerneldir/outoftree/mcspoof checkout master
+

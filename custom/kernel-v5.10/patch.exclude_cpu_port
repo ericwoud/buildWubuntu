@@ -1,0 +1,20 @@
+diff -Naur a/net/dsa/port.c b/net/dsa/port.c
+After applying this patch, any vlan group within 2000-2020
+will not also be added to the dsa cpu port.
+It does not seem to be necessary to apply this patch,
+but traffic does not need to go the cpu port when
+forwarding traffic through eth0 <-> aux <-> wan.
+--- a/net/dsa/port.c	2020-12-15 13:36:30.720498384 +0100
++++ b/net/dsa/port.c	2020-12-15 13:36:45.520629503 +0100
+@@ -373,4 +373,10 @@
+ 	};
+ 
++	if ((dp->type == DSA_PORT_TYPE_CPU) && (vlan->vid_begin >= 2000) && (vlan->vid_end <= 2020)) {
++		netdev_notice(dp->master, "wubuntu patch not adding vlan %d-%d to cpu port",
++				vlan->vid_begin, vlan->vid_end); 
++		return 0;
++	}
++
+ 	return dsa_port_notify(dp, DSA_NOTIFIER_VLAN_ADD, &info);
+ }
+

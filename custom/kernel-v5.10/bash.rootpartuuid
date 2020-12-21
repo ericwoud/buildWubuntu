@@ -1,0 +1,3 @@
+#!/bin/bash
+echo CONFIG_CMDLINE=\"rootdelay=5 root=PARTUUID=${mbrid^^}-01 rw init=/sbin/init console=ttyS0,115200\" | $sudo tee -a $kerneldir/.config
+

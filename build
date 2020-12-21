@@ -5,7 +5,8 @@ gcc="https://launchpad.net/gcc-arm-embedded/4.9/4.9-2015-q3-update/+download/gcc
 #gcc="https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2019q3/RC1.1/gcc-arm-none-eabi-8-2019-q3-update-linux.tar.bz2"
 
 #mainline="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.14.13"
-mainline="http://kernel.ubuntu.com/~kernel-ppa/mainline/v5.4.69"
+#mainline="http://kernel.ubuntu.com/~kernel-ppa/mainline/v5.4.69"
+mainline="http://kernel.ubuntu.com/~kernel-ppa/mainline/v5.10"
 kernellocalversion="-wrt0"           # Is added to kernelversion by make for name of modules dir.
 
 models="rango shelby" # caiman cobra # Model names in arch/arm/boot/dts/armada-385-linksys-xxx.dts
@@ -37,7 +38,7 @@ exec > >(tee -i build.log)
 exec 2> >(tee build-error.log)
 
 # INIT VARIABLES
-[ $USER = "root" ] && sudo="" || sudo="sudo"
+[ $USER = "root" ] && sudo="" || sudo="sudo -s"
 [[ $# == 0 ]] && args="-rktuap"|| args=$@
 echo "build "$args
 cd $(dirname $0)
@@ -81,6 +82,7 @@ fi
 kernelversion=$(basename $mainline)
 schroot="$sudo LC_ALL=C LANGUAGE=C LANG=C chroot $rootfsdir"
 kerneldir=$rootfsdir/usr/src/linux-headers-$kernelversion
+kerneldir=$(realpath $kerneldir)
 echo INSTALLDIR: $rootfsdir
 echo OPTIONS: rootfs=$r kernel=$k tar=$t usb=$u apt=$a 
 if [ "$K" = true ] ; then
@@ -195,6 +197,8 @@ if [ "$k" = true ] ; then
     fi
   fi
   makeoptions="--directory="$kerneldir" LOCALVERSION="$kernellocalversion" DEFAULT_HOSTNAME=WUBUNTUTEST ARCH=arm "$crossc" KBUILD_BUILD_TIMESTAMP=1/1/2011 KBUILD_BUILD_VERSION=123 KCFLAGS=-w"
+  outoftreeoptions=${makeoptions/--directory=/KDIR=}
+  $sudo mkdir -p $kerneldir/outoftree
   $sudo mkdir -p $rootfsdir/lib/firmware/wrt
   $sudo cp -r --remove-destination -v custom/kernel-$kernelversion/. $kerneldir
   $sudo cp -r --remove-destination -v custom/rootfs-$release/lib/firmware/. $rootfsdir/lib/firmware/
@@ -213,6 +217,12 @@ if [ "$k" = true ] ; then
   $sudo make $makeoptions $makej zImage modules
   $sudo make $makeoptions modules_install INSTALL_MOD_PATH="../../.."
   kernelrelease=$($sudo make -s $makeoptions kernelrelease)
+  for module in $kerneldir/outoftree/*
+  do 
+    (cd $module; $sudo make $outoftreeoptions) 
+    $sudo mkdir -p $rootfsdir/lib/modules/$kernelrelease/extra
+    $sudo cp -fv $module/*.ko $rootfsdir/lib/modules/$kernelrelease/extra
+  done
   $sudo depmod -ab $rootfsdir/. $kernelrelease
   $sudo ln --force --symbolic --relative --no-dereference $kerneldir $rootfsdir/lib/modules/$kernelrelease/build
   $sudo ln --force --symbolic --relative --no-dereference $kerneldir $rootfsdir/lib/modules/$kernelrelease/source

@@ -1,0 +1,11 @@
+#!/bin/bash
+  [ ! -d "$kerneldir/outoftree/mwlwifi" ] && $sudo git clone https://github.com/kaloz/mwlwifi.git \
+       $kerneldir/outoftree/mwlwifi 
+  $sudo git -C $kerneldir/outoftree/mwlwifi checkout 111118dc2ea3b592a5f7dff18c82d57a651970e7
+  $sudo cp -fr $kerneldir/outoftree/mwlwifi/bin/firmware \
+          $rootfsdir/lib/firmware/mwlwifi
+  $sudo wget -nv -N https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/plain/mrvl/sd8887_uapsta.bin \
+       -P $rootfsdir/lib/firmware/mrvl
+  $sudo wget -nv -N https://git.kernel.org/pub/scm/linux/kernel/git/linville/wireless-regdb.git/plain/db.txt \
+       -P $kerneldir/net/wireless
+

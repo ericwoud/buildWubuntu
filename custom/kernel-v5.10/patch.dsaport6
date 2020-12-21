@@ -1,0 +1,36 @@
+--- a/arch/arm/boot/dts/armada-385-linksys.dtsi	2020-10-20 08:28:22.114822000 +0200
++++ b/arch/arm/boot/dts/armada-385-linksys.dtsi	2020-11-29 22:13:17.856648935 +0100
+@@ -194,20 +194,32 @@
+ 			port@5 {
+ 				reg = <5>;
+ 				label = "cpu";
+ 				ethernet = <&eth2>;
+ 
+ 				fixed-link {
+ 					speed = <1000>;
+ 					full-duplex;
+ 				};
+ 			};
++
++			/* Add port 6 which is connected to eth0 */
++			port@6 {
++				reg = <6>;
++				label = "aux";
++				phy-mode = "rgmii-id";
++
++				fixed-link {
++					speed = <1000>;
++					full-duplex;
++				};
++			};
+ 		};
+ 	};
+ };
+ 
+ &pciec {
+ 	status = "okay";
+ };
+ 
+ &pcie1 {
+ 	/* Marvell 88W8864, 5GHz-only */
+
