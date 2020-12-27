@@ -16,10 +16,8 @@ d=/run/systemd/network ; mkdir -p $d ;\
 echo -e '[Match]\nOriginalName=lan* wan aux \n\n[Link]\nMACAddress='$mac0                         >$d/10-dsa.link ;\
 echo -e '[Match]\nOriginalName=eth0\n\n[Link]\nMACAddress='$mac2                                  >$d/10-eth0.link ;\
 echo -e '[Match]\nOriginalName=eth1\n\n[Link]\nMACAddress='$mac3                                  >$d/10-eth1.link ;\
-echo -e '[Match]\nOriginalName=eth2\n\n[Link]\nMACAddress='$mac4                                  >$d/10-eth2.link ;\
-echo -e '[Match]\nOriginalName=veth2\n\n[Link]\nMACAddress='$mac5                                 >$d/10-veth2.link ;\
-echo -e '[Match]\nOriginalName=eth3\n\n[Link]\nMACAddress='$mac6                                  >$d/10-eth2.link ;\
-echo -e '[Match]\nOriginalName=veth3\n\n[Link]\nMACAddress='$mac7                                 >$d/10-veth2.link ;\
+echo -e '[Match]\nOriginalName=eth3\n\n[Link]\nMACAddress='$mac4                                  >$d/10-eth3.link ;\
+echo -e '[Match]\nOriginalName=veth3\n\n[Link]\nMACAddress='$mac5                                 >$d/10-veth3.link ;\
 echo -e '[Match]\nProperty=ID_NET_NAME_PATH=wlp1s0\n\n[Link]\nNamePolicy=path\nMACAddress='$mac8  >$d/10-wlp1s0.link ;\
 echo -e '[Match]\nProperty=ID_NET_NAME_PATH=wlp2s0\n\n[Link]\nNamePolicy=path\nMACAddress='$mac12 >$d/10-wlp2s0.link ;\
 "

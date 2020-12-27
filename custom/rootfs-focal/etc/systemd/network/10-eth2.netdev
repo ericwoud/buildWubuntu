@@ -1,7 +1,0 @@
-[NetDev]
-Name=eth2
-Kind=veth
-
-[Peer]
-Name=veth2
-

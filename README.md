@@ -69,6 +69,13 @@ When you need to build in-tree/out-of-tree kernel modules, first execute the fol
 ```
 It helps set up the build scripts correctly (as armhf executable instead of x86 executable).
 
+## Setup as Access Point
+
+When using a second or third Wubuntu as Access Point, and connecting router-lan to AP-lan, do the following: 
+
+Setup the lan ports which connect router and AP as lan-trunk port on both router and AP. 
+
+On the AP, remove vet3/eth3, disable IpForwarding (br0.network). Setup the gateway address on the lan-port to the address of the router. Change ip address of br0, stay in the same subnet. Use a fix like [FDB Deamon](https://github.com/ericwoud/bridgefdbd) or [Mc Spoof](https://github.com/ericwoud/mcspoof).
 
 ## TODO:
 

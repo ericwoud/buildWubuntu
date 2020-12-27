@@ -1,9 +1,0 @@
-[Match]
-Name=eth2
-
-[Link]
-RequiredForOnline=no
-
-[Network]
-Address=192.168.5.1/24
-
