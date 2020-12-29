@@ -31,7 +31,7 @@ do
       line=${line%%#*}           # Remove comment in line
       line=${line/"\\"/"\\\\"}   # Replace \ with \\ to save \ from the next command
       line=${line@P}             # Expand variables mentioned in the line
-      declare $line
+      declare "$line"
       case $line in 
         bridge_vlan=*) 
           [[ $bss == "" ]] && bss=$interface
@@ -45,7 +45,7 @@ do
   exec=$exec" "$outfile
 done
 
-/usr/sbin/hostapd -B -P /run/hostapd.pid $exec
+/usr/sbin/hostapd -B -P /run/hostapd.pid $DAEMON_OPTS $exec
 
 function addvlan { 
   while [ ! -d /sys/class/net/$1/brport ]; do sleep 0.2; done
