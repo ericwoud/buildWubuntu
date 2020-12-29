@@ -31,12 +31,16 @@ do
       line=${line%%#*}           # Remove comment in line
       line=${line/"\\"/"\\\\"}   # Replace \ with \\ to save \ from the next command
       line=${line@P}             # Expand variables mentioned in the line
-      declare "$line"
+      declare "$line"            # declare and take care of spaces
       case $line in 
         bridge_vlan=*) 
           [[ $bss == "" ]] && bss=$interface
           execpost[post]="addvlan "$bss" "${line/"bridge_vlan="/}
           ((post++))
+          ;;
+        interface=*)
+          while [ ! -d /sys/class/net/$interface ]; do sleep 0.1; done
+          echo $line >>$outfile
           ;;
         *) echo $line >>$outfile;;
       esac

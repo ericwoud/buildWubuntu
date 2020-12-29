@@ -2,7 +2,7 @@
 Name=br0
 
 [Link]
-RequiredForOnline=yes
+RequiredForOnline=degraded-carrier
 
 [Network]
 IPForward=yes
