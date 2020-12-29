@@ -84,13 +84,13 @@ Most important: use a fix like [FDB Deamon](https://github.com/ericwoud/bridgefd
 
 * Test all new changes in build from scratch
 * Check building on wrt
-* Test 802.11i 802.11k 802.11r 802.11v
+* Test 802.11k 802.11r 802.11v
 
 ## Latest updates (29-Dec-2020)
 
 * Kernel v5.10 lts
 * Guest WIFI
-* 802.11i 802.11k 802.11r 802.11v
+* 802.11k 802.11r 802.11v
 * Using veth device instead of vlan devices. Now hostapd authentication works in combination with a vlan aware bridge. When attaching br0.2 and br0.3 to br0, hostapd cannot communicate over br0 anymore.
 * Patch cpu port. After applying this patch, any vlan group within 2000-2020 will not also be added to the dsa cpu port. It does not seem to be necessary to apply this patch, but traffic does not need to go the cpu port when forwarding traffic through eth0 <-> aux <-> wan.
 
