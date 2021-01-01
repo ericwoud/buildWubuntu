@@ -1,5 +1,7 @@
 #!/bin/bash
 
+hostapd="/usr/sbin/hostapd"
+#hostapd="/root/hostap/hostapd/hostapd"
 hpath="/etc/hostapd"
 out="/run/hostapdconf"
 post=0
@@ -49,7 +51,7 @@ do
   exec=$exec" "$outfile
 done
 
-/usr/sbin/hostapd -B -P /run/hostapd.pid $DAEMON_OPTS $exec
+$hostapd -B -P /run/hostapd.pid $DAEMON_OPTS $exec
 
 function addvlan { 
   while [ ! -d /sys/class/net/$1/brport ]; do sleep 0.2; done
